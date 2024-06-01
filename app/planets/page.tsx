@@ -13,7 +13,7 @@ type State = {
     next: string | null
 }
 
-export const load = (async (query: ReadonlyURLSearchParams, search: string) => {
+const load = (async (query: ReadonlyURLSearchParams, search: string) => {
     const id = query.get('id');
     const page = query.get('page');
 
