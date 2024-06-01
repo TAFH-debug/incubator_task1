@@ -11,7 +11,16 @@
   .no-scrollbar {
       -ms-overflow-style: none;  /* IE and Edge */
       scrollbar-width: none;  /* Firefox */
+  } 
 }
+
+body {
+  background-color: black;
+}
+
+.bg-image-starwars {
+  background-image: url('/bg.jpeg');
+  background-size: cover;
 }
 
 input[type='number'] {

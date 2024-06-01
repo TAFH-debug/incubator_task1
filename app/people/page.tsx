@@ -1,16 +1,14 @@
 'use client';
 
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
-import { Data, loadPlanet, loadPlanets, Planet, Resident } from "../lib/planets";
 import Image from "next/image";
 import DataBlock from "../ui/data_block";
 import { useEffect, useState } from "react";
+import { loadPeople, loadPerson, Person } from "../lib/people";
 
 type State = {
-    planets: Array<Planet>,
-    isLoading: boolean,
-    prev: string | null,
-    next: string | null
+    people: Array<Person>,
+    isLoading: boolean
 }
 
 export const load = (async (query: ReadonlyURLSearchParams, search: string) => {
@@ -18,17 +16,17 @@ export const load = (async (query: ReadonlyURLSearchParams, search: string) => {
     const page = query.get('page');
 
     if (typeof id === 'string') {
-        const planet = await loadPlanet(id);
+        const Person = await loadPerson(id);
         return { 
             props: {
-                planets: [planet],
+                people: [Person],
                 prev: null,
                 next: null
             }
         }
     }
 
-    const props = await loadPlanets(
+    const props = await loadPeople(
         typeof search === 'string' ? search : null,
         typeof page === 'string' ? page : null
     );
@@ -43,7 +41,7 @@ export default function Client() {
 
     if (query.has('id')) {
         return (
-            <PlanetPage id={query.get('id')}/>
+            <PersonPage id={query.get('id')}/>
         )
     }
 
@@ -73,30 +71,31 @@ function Input({ search, setSearch }: { search: string, setSearch: ((src: string
 function List({ search }: { search: string }) {
     const query = useSearchParams();
 
-    const [state, setState] = useState<State>({ planets: [], isLoading: true, prev: '', next: '' });
+    const [state, setState] = useState<State>({ people: [], isLoading: true });
 
     useEffect(() => { 
         async function efct() {
             const data = (await load(query, search)).props; 
-            setState({ planets: data.planets, isLoading: false, prev: data.prev, next: data.next });
+            setState({ people: data.people, isLoading: false });
+            console.log(data);
         }
         efct();
     }, [query, search]);
 
     if (state.isLoading) return <div></div>;
 
-    return state.planets.map((val) => {
-        return <DataBlock key={val.url} title={ val.name } content={ val.climate } href={"/planets?id=" + val.url } />
+    return state.people.map((val) => {
+        return <DataBlock key={val.url} title={ val.name } content={ val.birth_year } href={"/people?id=" + val.url.split('/').reverse()[1] } />
     })
 }
 
-function PlanetPage({ id }: { id: string | null }) {
+function PersonPage({ id }: { id: string | null }) {
 
-    const [planet, setPlanet] = useState<Planet>({ 
+    const [person, setPerson] = useState<Person>({ 
         name: '', 
-        terrain: '', 
-        climate: '', 
-        residents: [],
+        birth_year: '',
+        gender: '',
+        height: '',
         url: ''
     });
 
@@ -104,8 +103,8 @@ function PlanetPage({ id }: { id: string | null }) {
 
     useEffect(() => {
         async function efct() {
-            const data = (await loadPlanet(id));
-            setPlanet(data);
+            const data = (await loadPerson(id));
+            setPerson(data);
             setLoading(false);
         }
         efct();
@@ -114,29 +113,16 @@ function PlanetPage({ id }: { id: string | null }) {
     return (
         <div className="flex w-screen h-screen text-white justify-center items-center bg-image-starwars">
             <div className="flex flex-col w-2/5 min-h-4/5 rounded-lg bg-black items-center">
-                <div className='m-20 font-bold text-5xl text-center'>STAR WARS PLANET</div>
+                <div className='m-20 font-bold text-5xl text-center'>STAR WARS PERSON</div>
                 {
                     isLoading ? <div className="font-bold m-20">Loading...</div> : (<>
-                        <div className="text-2xl"><strong>Name:</strong> {planet.name}</div>
-                        <div className="text-2xl"><strong>Climate:</strong> {planet.climate}</div>
-                        <div className="text-2xl"><strong>Terrain:</strong> {planet.terrain}</div>
-                        <div className="text-2xl"><strong>Residents:</strong></div>
-                        <ResidentList residents={planet.residents} />
+                        <div className="text-2xl"><strong>Name:</strong> {person.name}</div>
+                        <div className="text-2xl"><strong>Birth year:</strong> {person.birth_year}</div>
+                        <div className="text-2xl"><strong>Gender:</strong> {person.gender}</div>
+                        <div className="text-2xl mb-10"><strong>Height:</strong> {person.height}</div>
                     </>)
                 }
             </div>
         </div>
-    )
-}
-
-
-function ResidentList({ residents }: { residents: Array<Resident> }) {
-
-    return (
-        residents.map((resd, index) => {
-            return <a className="m-1 hover:text-blue-700" key={index} href={"/people?id=" + resd.href.split('/').reverse()[1]}>
-                {resd.name}
-            </a>
-        })
     )
 }
