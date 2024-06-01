@@ -7,8 +7,10 @@ import { useEffect, useState } from "react";
 import { loadStarship, loadStarships, Starship } from "../lib/starships";
 
 type State = {
-    people: Array<Starship>,
-    isLoading: boolean
+    starships: Array<Starship>,
+    isLoading: boolean,
+    prev: string | null,
+    next: string | null
 }
 
 export const load = (async (query: ReadonlyURLSearchParams, search: string) => {
@@ -19,7 +21,7 @@ export const load = (async (query: ReadonlyURLSearchParams, search: string) => {
         const Starship = await loadStarship(id);
         return { 
             props: {
-                people: [Starship],
+                starships: [Starship],
                 prev: null,
                 next: null
             }
@@ -71,22 +73,37 @@ function Input({ search, setSearch }: { search: string, setSearch: ((src: string
 function List({ search }: { search: string }) {
     const query = useSearchParams();
 
-    const [state, setState] = useState<State>({ people: [], isLoading: true });
+    const [state, setState] = useState<State>({ starships: [], isLoading: true, prev: null, next: null });
 
     useEffect(() => { 
         async function efct() {
             const data = (await load(query, search)).props; 
-            setState({ people: data.people, isLoading: false });
-            console.log(data);
+            setState({ starships: data.starships, isLoading: false, prev: data.prev, next: data.next });
         }
         efct();
     }, [query, search]);
 
     if (state.isLoading) return <div></div>;
 
-    return state.people.map((val) => {
-        return <DataBlock key={val.url} title={ val.name } content={ val.model } href={"/starships?id=" + val.url.split('/').reverse()[1] } />
-    })
+    return <> 
+        {
+            state.starships.map((val) => {
+                return <DataBlock key={val.url} title={ val.name } content={ val.model } href={"/starships?id=" + val.url } />
+            })
+        }
+        <div className="h-[150px] w-full flex items-center justify-center">
+        {
+            state.prev !== null ? 
+            <a href={state.prev} className="bg-blue-500 rounded-full p-3 m-10 hover:bg-blue-400">Previous</a>
+            : <></>
+        }
+        {
+            state.next !== null ? 
+            <a href={state.next} className="bg-blue-500 rounded-full p-3 m-10 hover:bg-blue-400">Next</a>
+            : <></>
+        }
+        </div>
+    </>
 }
 
 function StarshipPage({ id }: { id: string | null }) {

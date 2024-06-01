@@ -85,9 +85,25 @@ function List({ search }: { search: string }) {
 
     if (state.isLoading) return <div></div>;
 
-    return state.planets.map((val) => {
-        return <DataBlock key={val.url} title={ val.name } content={ val.climate } href={"/planets?id=" + val.url } />
-    })
+    return <> 
+        {
+            state.planets.map((val) => {
+                return <DataBlock key={val.url} title={ val.name } content={ val.climate } href={"/planets?id=" + val.url } />
+            })
+        }
+        <div className="h-[150px] w-full flex items-center justify-center">
+        {
+            state.prev !== null ? 
+            <a href={state.prev} className="bg-blue-500 rounded-full p-3 m-10 hover:bg-blue-400">Previous</a>
+            : <></>
+        }
+        {
+            state.next !== null ? 
+            <a href={state.next} className="bg-blue-500 rounded-full p-3 m-10 hover:bg-blue-400">Next</a>
+            : <></>
+        }
+        </div>
+    </>
 }
 
 function PlanetPage({ id }: { id: string | null }) {

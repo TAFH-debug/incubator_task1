@@ -48,6 +48,15 @@ export async function loadPlanets(search: string | null, page: string | null) {
     const res: { prev: string | null, next: string | null, planets: Array<Planet> } = { 
         planets: [], prev: null, next: null };
 
+    if (req.previous != null) {
+        res.prev = `/planets?search=${s}&page=${req.previous.split('=').reverse()[0]}`;
+    }
+
+    console.log(req);
+    if (req.next != null) {
+        res.next = `/planets?search=${s}&page=${req.next.split('=').reverse()[0]}`;
+    }
+
     req.results.forEach( (element: { name: string, climate: string, terrain: string, url: string, residents: Array<string> }) => {
         res.planets.push({
             name: element.name,

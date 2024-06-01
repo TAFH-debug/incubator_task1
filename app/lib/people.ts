@@ -29,6 +29,13 @@ export async function loadPeople(search: string | null, page: string | null) {
     const res: { prev: string | null, next: string | null, people: Array<Person> } = { 
         people: req.results, prev: null, next: null };
 
+    if (req.previous != null) {
+        res.prev = `/people?search=${s}&page=${req.previous.split('=').reverse()[0]}`;
+    }
+
+    if (req.next != null) {
+        res.next = `/people?search=${s}&page=${req.next.split('=').reverse()[0]}`;
+    }
 
     return res;
 }
